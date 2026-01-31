@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>微信小程序链接跳转工具</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -42,14 +41,6 @@
         .header h1 {
             font-size: 28px;
             margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-        }
-        
-        .header h1 i {
-            font-size: 32px;
         }
         
         .header p {
@@ -76,20 +67,11 @@
             font-weight: 600;
             margin-bottom: 10px;
             color: #333;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
         }
         
         input {
             width: 100%;
-            padding: 18px 20px 18px 55px;
+            padding: 18px 20px;
             font-size: 16px;
             border: 2px solid #e0e0e0;
             border-radius: 12px;
@@ -100,13 +82,6 @@
         input:focus {
             border-color: #07c160;
             box-shadow: 0 0 0 3px rgba(7, 193, 96, 0.2);
-        }
-        
-        .input-icon {
-            position: absolute;
-            left: 20px;
-            font-size: 20px;
-            color: #07c160;
         }
         
         button {
@@ -120,10 +95,6 @@
             cursor: pointer;
             transition: all 0.3s ease;
             width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
             margin-top: 10px;
         }
         
@@ -155,9 +126,6 @@
             font-weight: 600;
             margin-bottom: 15px;
             color: #333;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
         
         .result-content {
@@ -180,11 +148,6 @@
             align-items: center;
             gap: 10px;
             font-size: 15px;
-        }
-        
-        .link-item i {
-            color: #07c160;
-            width: 20px;
         }
         
         .link-value {
@@ -223,9 +186,6 @@
             font-size: 18px;
             margin-bottom: 20px;
             color: #333;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
         
         .instructions ul {
@@ -286,6 +246,24 @@
             margin: 0 auto 15px;
         }
         
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #07c160;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            font-weight: 500;
+            animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+        }
+        
+        .toast.error {
+            background-color: #f44336;
+        }
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -294,6 +272,16 @@
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
         }
         
         @media (max-width: 768px) {
@@ -308,33 +296,24 @@
             .action-buttons {
                 flex-direction: column;
             }
-            
-            input {
-                padding: 16px 20px 16px 55px;
-            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1><i class="fab fa-weixin"></i> 微信小程序链接跳转工具</h1>
+            <h1>微信小程序链接跳转工具</h1>
             <p>输入链接即可自动跳转到微信小程序页面</p>
         </div>
         
         <div class="content">
             <div class="input-section">
                 <div class="input-group">
-                    <label for="linkInput"><i class="fas fa-link"></i> 输入链接</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-paste input-icon"></i>
-                        <input type="text" id="linkInput" placeholder="请输入形如 https://xxx 或 weixin://xxx 或 #小程序://xx小程序/ 的链接">
-                    </div>
+                    <label for="linkInput">输入链接</label>
+                    <input type="text" id="linkInput" placeholder="例如: https://xxx 或 weixin://xxx 或 #小程序://xxx">
                 </div>
                 
-                <button id="processBtn">
-                    <i class="fas fa-rocket"></i> 处理并跳转
-                </button>
+                <button id="processBtn">处理并跳转</button>
             </div>
             
             <div class="loading" id="loading">
@@ -343,34 +322,26 @@
             </div>
             
             <div class="result-section" id="resultSection">
-                <div class="result-title">
-                    <i class="fas fa-info-circle"></i> 链接解析结果
-                </div>
+                <div class="result-title">链接解析结果</div>
                 <div class="result-content">
                     <div class="link-info">
                         <div class="link-item">
-                            <i class="fas fa-check-circle"></i>
                             <span>链接类型: <span class="link-value" id="linkType"></span></span>
                         </div>
                         <div class="link-item">
-                            <i class="fas fa-external-link-alt"></i>
                             <span>跳转地址: <span class="link-value" id="jumpUrl"></span></span>
                         </div>
                     </div>
                     
                     <div class="action-buttons">
-                        <button id="jumpBtn">
-                            <i class="fas fa-external-link-alt"></i> 立即跳转
-                        </button>
-                        <button id="copyBtn" class="secondary">
-                            <i class="fas fa-copy"></i> 复制链接
-                        </button>
+                        <button id="jumpBtn">立即跳转</button>
+                        <button id="copyBtn" class="secondary">复制链接</button>
                     </div>
                 </div>
             </div>
             
             <div class="instructions">
-                <h3><i class="fas fa-question-circle"></i> 使用说明</h3>
+                <h3>使用说明</h3>
                 <ul>
                     <li>支持多种格式的微信小程序链接：
                         <ul style="margin-top: 10px; padding-left: 20px;">
@@ -402,19 +373,6 @@
             const jumpBtn = document.getElementById('jumpBtn');
             const copyBtn = document.getElementById('copyBtn');
             
-            // 粘贴板功能
-            linkInput.addEventListener('click', async function() {
-                try {
-                    const text = await navigator.clipboard.readText();
-                    if (text && (text.includes('://') || text.startsWith('#小程序://'))) {
-                        linkInput.value = text;
-                        showToast('已粘贴剪贴板内容');
-                    }
-                } catch (err) {
-                    // 如果无法读取剪贴板，忽略错误
-                }
-            });
-            
             // 处理链接
             processBtn.addEventListener('click', function() {
                 const input = linkInput.value.trim();
@@ -444,16 +402,14 @@
                 // 判断链接类型并处理
                 if (input.startsWith('http://') || input.startsWith('https://')) {
                     type = 'HTTP/HTTPS链接';
-                    // 如果是普通网址，保持原样
                     processedUrl = input;
                 } else if (input.startsWith('weixin://')) {
                     type = '微信Scheme链接';
-                    // 微信scheme链接
                     processedUrl = input;
                 } else if (input.startsWith('#小程序://')) {
                     type = '微信小程序短链接';
-                    // 微信小程序短链接，需要转换为可跳转格式
-                    // 实际场景中可能需要后端处理，这里简化处理
+                    // 微信小程序短链接，转换为微信可识别的格式
+                    // 这里使用URL编码确保特殊字符正确处理
                     processedUrl = 'weixin://dl/business/?t=' + encodeURIComponent(input);
                 } else if (input.includes('://')) {
                     type = '其他Scheme链接';
@@ -474,20 +430,26 @@
                     window.open(processedUrl, '_blank');
                 };
                 
-                // 设置复制按钮
+                // 设置复制按钮 - 使用简单的复制方法
                 copyBtn.onclick = function() {
-                    navigator.clipboard.writeText(processedUrl).then(() => {
-                        showToast('链接已复制到剪贴板');
-                    }).catch(err => {
-                        // 如果剪贴板API不可用，使用备用方法
-                        const textArea = document.createElement('textarea');
-                        textArea.value = processedUrl;
-                        document.body.appendChild(textArea);
-                        textArea.select();
+                    // 创建临时文本域
+                    const textArea = document.createElement('textarea');
+                    textArea.value = processedUrl;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-999999px';
+                    textArea.style.top = '-999999px';
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    
+                    try {
                         document.execCommand('copy');
-                        document.body.removeChild(textArea);
                         showToast('链接已复制到剪贴板');
-                    });
+                    } catch (err) {
+                        showToast('复制失败，请手动复制', 'error');
+                    }
+                    
+                    document.body.removeChild(textArea);
                 };
                 
                 // 滚动到结果区域
@@ -504,21 +466,8 @@
                 
                 // 创建提示元素
                 const toast = document.createElement('div');
-                toast.className = `toast ${type}`;
+                toast.className = `toast ${type === 'error' ? 'error' : ''}`;
                 toast.textContent = message;
-                toast.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    background-color: ${type === 'error' ? '#f44336' : '#07c160'};
-                    color: white;
-                    padding: 15px 25px;
-                    border-radius: 10px;
-                    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-                    z-index: 1000;
-                    font-weight: 500;
-                    animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
-                `;
                 
                 document.body.appendChild(toast);
                 
@@ -530,27 +479,6 @@
                 }, 3000);
             }
             
-            // 添加CSS动画
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes slideIn {
-                    from { transform: translateX(100%); opacity: 0; }
-                    to { transform: translateX(0); opacity: 1; }
-                }
-                @keyframes fadeOut {
-                    from { opacity: 1; }
-                    to { opacity: 0; }
-                }
-            `;
-            document.head.appendChild(style);
-            
-            // 示例链接提示
-            linkInput.addEventListener('focus', function() {
-                if (!this.value) {
-                    this.placeholder = '例如: https://wxaurl.cn/xxxx 或 weixin://dl/business/?t=xxx 或 #小程序://美团外卖/首页';
-                }
-            });
-            
             // 处理回车键
             linkInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
@@ -558,16 +486,32 @@
                 }
             });
             
-            // 添加一些示例链接到输入框，方便测试
-            const exampleLinks = [
-                'https://wxaurl.cn/p/xxxx',
-                'weixin://dl/business/?t=abcdefg',
-                '#小程序://美团外卖/首页'
+            // 示例测试按钮
+            const testExamples = [
+                {name: "HTTPS链接", value: "https://wxaurl.cn/p/xxxx"},
+                {name: "微信Scheme", value: "weixin://dl/business/?t=abcdefg"},
+                {name: "小程序短链", value: "#小程序://美团外卖/首页"}
             ];
             
-            // 随机选择一个示例作为占位符
-            const randomExample = exampleLinks[Math.floor(Math.random() * exampleLinks.length)];
-            linkInput.placeholder = `例如: ${randomExample}`;
+            // 添加测试按钮到页面
+            const testDiv = document.createElement('div');
+            testDiv.style.marginTop = '15px';
+            testDiv.style.display = 'flex';
+            testDiv.style.gap = '10px';
+            testDiv.style.flexWrap = 'wrap';
+            
+            testExamples.forEach(example => {
+                const btn = document.createElement('button');
+                btn.textContent = example.name;
+                btn.style.cssText = 'padding: 8px 15px; font-size: 14px; width: auto; margin: 0;';
+                btn.onclick = function() {
+                    linkInput.value = example.value;
+                    showToast(`已填入${example.name}示例`);
+                };
+                testDiv.appendChild(btn);
+            });
+            
+            linkInput.parentNode.insertBefore(testDiv, linkInput.nextSibling);
         });
     </script>
 </body>
