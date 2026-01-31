@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微信小程序链接跳转工具</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #07c160 0%, #05a34a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+        
+        .header {
+            background-color: #07c160;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .header h1 i {
+            font-size: 32px;
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .input-section {
+            margin-bottom: 40px;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+        
+        label {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        input {
+            width: 100%;
+            padding: 18px 20px 18px 55px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus {
+            border-color: #07c160;
+            box-shadow: 0 0 0 3px rgba(7, 193, 96, 0.2);
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 20px;
+            font-size: 20px;
+            color: #07c160;
+        }
+        
+        button {
+            background-color: #07c160;
+            color: white;
+            border: none;
+            padding: 18px 30px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background-color: #05a34a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(5, 163, 74, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .result-section {
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .result-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .result-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .result-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+            word-break: break-all;
+        }
+        
+        .link-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .link-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+        }
+        
+        .link-item i {
+            color: #07c160;
+            width: 20px;
+        }
+        
+        .link-value {
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .action-buttons button {
+            flex: 1;
+            padding: 15px;
+            font-size: 16px;
+        }
+        
+        .action-buttons .secondary {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        
+        .action-buttons .secondary:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .instructions {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .instructions h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .instructions ul {
+            list-style-type: none;
+            padding-left: 10px;
+        }
+        
+        .instructions li {
+            margin-bottom: 15px;
+            padding-left: 30px;
+            position: relative;
+            line-height: 1.6;
+        }
+        
+        .instructions li:before {
+            content: "•";
+            color: #07c160;
+            font-size: 24px;
+            position: absolute;
+            left: 0;
+            top: -3px;
+        }
+        
+        .instructions code {
+            background-color: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            color: #d63384;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 14px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(7, 193, 96, 0.2);
+            border-radius: 50%;
+            border-top: 4px solid #07c160;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            input {
+                padding: 16px 20px 16px 55px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fab fa-weixin"></i> 微信小程序链接跳转工具</h1>
+            <p>输入链接即可自动跳转到微信小程序页面</p>
+        </div>
+        
+        <div class="content">
+            <div class="input-section">
+                <div class="input-group">
+                    <label for="linkInput"><i class="fas fa-link"></i> 输入链接</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-paste input-icon"></i>
+                        <input type="text" id="linkInput" placeholder="请输入形如 https://xxx 或 weixin://xxx 或 #小程序://xx小程序/ 的链接">
+                    </div>
+                </div>
+                
+                <button id="processBtn">
+                    <i class="fas fa-rocket"></i> 处理并跳转
+                </button>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>正在处理链接，请稍候...</p>
+            </div>
+            
+            <div class="result-section" id="resultSection">
+                <div class="result-title">
+                    <i class="fas fa-info-circle"></i> 链接解析结果
+                </div>
+                <div class="result-content">
+                    <div class="link-info">
+                        <div class="link-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>链接类型: <span class="link-value" id="linkType"></span></span>
+                        </div>
+                        <div class="link-item">
+                            <i class="fas fa-external-link-alt"></i>
+                            <span>跳转地址: <span class="link-value" id="jumpUrl"></span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button id="jumpBtn">
+                            <i class="fas fa-external-link-alt"></i> 立即跳转
+                        </button>
+                        <button id="copyBtn" class="secondary">
+                            <i class="fas fa-copy"></i> 复制链接
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="instructions">
+                <h3><i class="fas fa-question-circle"></i> 使用说明</h3>
+                <ul>
+                    <li>支持多种格式的微信小程序链接：
+                        <ul style="margin-top: 10px; padding-left: 20px;">
+                            <li style="font-size: 14px;">HTTP/HTTPS链接: <code>https://xxx.xxx</code></li>
+                            <li style="font-size: 14px;">微信Scheme链接: <code>weixin://xxx</code></li>
+                            <li style="font-size: 14px;">小程序短链接: <code>#小程序://小程序名称/页面路径</code></li>
+                        </ul>
+                    </li>
+                    <li>点击"处理并跳转"按钮后，系统会自动识别链接类型并生成跳转地址</li>
+                    <li>点击"立即跳转"会在新窗口打开链接，如果是在微信内打开，将会直接跳转到小程序</li>
+                    <li>如无法直接跳转，可复制链接后手动在微信中打开</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2023 微信小程序链接跳转工具 | 本工具仅用于链接格式转换</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const linkInput = document.getElementById('linkInput');
+            const processBtn = document.getElementById('processBtn');
+            const resultSection = document.getElementById('resultSection');
+            const loading = document.getElementById('loading');
+            const linkType = document.getElementById('linkType');
+            const jumpUrl = document.getElementById('jumpUrl');
+            const jumpBtn = document.getElementById('jumpBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            
+            // 粘贴板功能
+            linkInput.addEventListener('click', async function() {
+                try {
+                    const text = await navigator.clipboard.readText();
+                    if (text && (text.includes('://') || text.startsWith('#小程序://'))) {
+                        linkInput.value = text;
+                        showToast('已粘贴剪贴板内容');
+                    }
+                } catch (err) {
+                    // 如果无法读取剪贴板，忽略错误
+                }
+            });
+            
+            // 处理链接
+            processBtn.addEventListener('click', function() {
+                const input = linkInput.value.trim();
+                
+                if (!input) {
+                    showToast('请输入链接', 'error');
+                    linkInput.focus();
+                    return;
+                }
+                
+                // 显示加载动画
+                loading.classList.add('active');
+                resultSection.classList.remove('active');
+                
+                // 模拟处理过程
+                setTimeout(() => {
+                    processLink(input);
+                    loading.classList.remove('active');
+                }, 800);
+            });
+            
+            // 处理链接函数
+            function processLink(input) {
+                let processedUrl = '';
+                let type = '';
+                
+                // 判断链接类型并处理
+                if (input.startsWith('http://') || input.startsWith('https://')) {
+                    type = 'HTTP/HTTPS链接';
+                    // 如果是普通网址，保持原样
+                    processedUrl = input;
+                } else if (input.startsWith('weixin://')) {
+                    type = '微信Scheme链接';
+                    // 微信scheme链接
+                    processedUrl = input;
+                } else if (input.startsWith('#小程序://')) {
+                    type = '微信小程序短链接';
+                    // 微信小程序短链接，需要转换为可跳转格式
+                    // 实际场景中可能需要后端处理，这里简化处理
+                    processedUrl = 'weixin://dl/business/?t=' + encodeURIComponent(input);
+                } else if (input.includes('://')) {
+                    type = '其他Scheme链接';
+                    processedUrl = input;
+                } else {
+                    // 如果不是标准格式，尝试添加https://前缀
+                    type = '已自动补全为HTTPS链接';
+                    processedUrl = 'https://' + input;
+                }
+                
+                // 显示结果
+                linkType.textContent = type;
+                jumpUrl.textContent = processedUrl;
+                resultSection.classList.add('active');
+                
+                // 设置跳转按钮
+                jumpBtn.onclick = function() {
+                    window.open(processedUrl, '_blank');
+                };
+                
+                // 设置复制按钮
+                copyBtn.onclick = function() {
+                    navigator.clipboard.writeText(processedUrl).then(() => {
+                        showToast('链接已复制到剪贴板');
+                    }).catch(err => {
+                        // 如果剪贴板API不可用，使用备用方法
+                        const textArea = document.createElement('textarea');
+                        textArea.value = processedUrl;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                        showToast('链接已复制到剪贴板');
+                    });
+                };
+                
+                // 滚动到结果区域
+                resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            
+            // 显示提示
+            function showToast(message, type = 'success') {
+                // 移除现有提示
+                const existingToast = document.querySelector('.toast');
+                if (existingToast) {
+                    existingToast.remove();
+                }
+                
+                // 创建提示元素
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
+                toast.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background-color: ${type === 'error' ? '#f44336' : '#07c160'};
+                    color: white;
+                    padding: 15px 25px;
+                    border-radius: 10px;
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                    z-index: 1000;
+                    font-weight: 500;
+                    animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+                `;
+                
+                document.body.appendChild(toast);
+                
+                // 3秒后自动移除
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.remove();
+                    }
+                }, 3000);
+            }
+            
+            // 添加CSS动画
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes fadeOut {
+                    from { opacity: 1; }
+                    to { opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // 示例链接提示
+            linkInput.addEventListener('focus', function() {
+                if (!this.value) {
+                    this.placeholder = '例如: https://wxaurl.cn/xxxx 或 weixin://dl/business/?t=xxx 或 #小程序://美团外卖/首页';
+                }
+            });
+            
+            // 处理回车键
+            linkInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    processBtn.click();
+                }
+            });
+            
+            // 添加一些示例链接到输入框，方便测试
+            const exampleLinks = [
+                'https://wxaurl.cn/p/xxxx',
+                'weixin://dl/business/?t=abcdefg',
+                '#小程序://美团外卖/首页'
+            ];
+            
+            // 随机选择一个示例作为占位符
+            const randomExample = exampleLinks[Math.floor(Math.random() * exampleLinks.length)];
+            linkInput.placeholder = `例如: ${randomExample}`;
+        });
+    </script>
+</body>
+</html>
